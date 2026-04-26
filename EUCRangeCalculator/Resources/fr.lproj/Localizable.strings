@@ -1,0 +1,74 @@
+/* 
+  Localizable.strings (French)
+  EUC Range Calculator
+*/
+
+// MARK: - Tabs
+"tab.calculator" = "Calculatrice";
+"tab.live" = "Live GPS";
+
+// MARK: - Common
+"common.reset" = "Réinitialiser";
+"common.at" = "à";
+
+// MARK: - Calculator
+"calc.title" = "EUC Range";
+"calc.distance" = "Distance (km)";
+"calc.cruise_speed" = "Vitesse moy.";
+"calc.wheel" = "Modèle de gyroroue";
+"calc.remaining_after_ride" = "Batterie restante après le trajet";
+"calc.effective_consumption" = "Conso à cette vitesse";
+"calc.energy_consumed" = "Énergie consommée";
+"calc.real_range" = "Autonomie réelle";
+
+"calc.motor_load" = "Charge moteur en croisière";
+"calc.average_power" = "Puissance moyenne";
+"calc.headroom_to_rated" = "Marge avant rated";
+"calc.of_rated" = "du rated";
+
+"calc.specs_title" = "Specs du modèle";
+"calc.battery" = "Batterie";
+"calc.voltage" = "Tension";
+"calc.consumption_ref" = "Conso ref @30 km/h";
+"calc.motor_rated" = "Moteur rated";
+"calc.motor_peak" = "Moteur peak";
+"calc.category" = "Catégorie";
+
+"calc.safety_table" = "Distances selon marge de sécurité";
+"calc.margin_50" = "50% restant";
+"calc.margin_40" = "40% restant";
+"calc.margin_30" = "30% restant";
+"calc.margin_20" = "20% restant";
+"calc.margin_0" = "Théorique à 0%";
+
+"calc.advanced_mode" = "Mode avancé";
+"calc.override_battery" = "Override batterie";
+"calc.override_consumption" = "Override conso ref @30";
+
+"calc.hint" = "Modèle aéro empirique : conso × (0.6 + 0.4 × (V/30)²). Calibré sur données communauté EUC.";
+
+// MARK: - Status
+"status.ok" = "OK";
+"status.low_margin" = "Marge faible";
+"status.risky" = "Risqué";
+"status.empty" = "Insuffisant";
+
+// MARK: - Live mode
+"live.title" = "Mode Live";
+"live.wheel_voltage" = "Roue + voltage actuel";
+"live.input_mode_voltage" = "Volts";
+"live.input_mode_percent" = "Pourcentage";
+"live.voltage_range" = "Plage : %.1f V (vide) → %.1f V (plein)";
+"live.gps_speed" = "Vitesse GPS";
+"live.gps_live" = "Signal";
+"live.gps_no_signal" = "Pas de signal";
+"live.battery_remaining" = "Batterie restante";
+"live.range_at_speed" = "Autonomie à cette vitesse";
+"live.margin_30" = "Avec 30% marge";
+"live.live_consumption" = "Conso live";
+"live.motor_load" = "Charge moteur";
+"live.start_tracking" = "Démarrer le tracking";
+"live.stop_tracking" = "Arrêter";
+"live.permission_denied" = "Localisation refusée. Active-la dans les Réglages.";
+"live.open_settings" = "Ouvrir les Réglages";
+"live.recalibrate_hint" = "Tu peux mettre à jour le voltage à tout moment pendant le trajet en regardant ta roue.";

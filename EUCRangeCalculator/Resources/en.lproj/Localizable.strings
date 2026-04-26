@@ -1,0 +1,74 @@
+/* 
+  Localizable.strings (English)
+  EUC Range Calculator
+*/
+
+// MARK: - Tabs
+"tab.calculator" = "Calculator";
+"tab.live" = "Live GPS";
+
+// MARK: - Common
+"common.reset" = "Reset";
+"common.at" = "at";
+
+// MARK: - Calculator
+"calc.title" = "EUC Range";
+"calc.distance" = "Distance (km)";
+"calc.cruise_speed" = "Avg speed";
+"calc.wheel" = "EUC model";
+"calc.remaining_after_ride" = "Battery remaining after the ride";
+"calc.effective_consumption" = "Consumption at this speed";
+"calc.energy_consumed" = "Energy consumed";
+"calc.real_range" = "Real range";
+
+"calc.motor_load" = "Motor load at cruise";
+"calc.average_power" = "Average power";
+"calc.headroom_to_rated" = "Headroom to rated";
+"calc.of_rated" = "of rated";
+
+"calc.specs_title" = "Model specs";
+"calc.battery" = "Battery";
+"calc.voltage" = "Voltage";
+"calc.consumption_ref" = "Ref. @30 km/h";
+"calc.motor_rated" = "Motor rated";
+"calc.motor_peak" = "Motor peak";
+"calc.category" = "Category";
+
+"calc.safety_table" = "Distances by safety margin";
+"calc.margin_50" = "50% remaining";
+"calc.margin_40" = "40% remaining";
+"calc.margin_30" = "30% remaining";
+"calc.margin_20" = "20% remaining";
+"calc.margin_0" = "Theoretical (0%)";
+
+"calc.advanced_mode" = "Advanced mode";
+"calc.override_battery" = "Battery override";
+"calc.override_consumption" = "Ref. consumption override @30";
+
+"calc.hint" = "Empirical aero model: consumption × (0.6 + 0.4 × (V/30)²). Calibrated on EUC community data.";
+
+// MARK: - Status
+"status.ok" = "OK";
+"status.low_margin" = "Low margin";
+"status.risky" = "Risky";
+"status.empty" = "Insufficient";
+
+// MARK: - Live mode
+"live.title" = "Live mode";
+"live.wheel_voltage" = "Wheel + current voltage";
+"live.input_mode_voltage" = "Volts";
+"live.input_mode_percent" = "Percent";
+"live.voltage_range" = "Range: %.1f V (empty) → %.1f V (full)";
+"live.gps_speed" = "GPS speed";
+"live.gps_live" = "Signal";
+"live.gps_no_signal" = "No signal";
+"live.battery_remaining" = "Battery remaining";
+"live.range_at_speed" = "Range at this speed";
+"live.margin_30" = "With 30% margin";
+"live.live_consumption" = "Live consumption";
+"live.motor_load" = "Motor load";
+"live.start_tracking" = "Start tracking";
+"live.stop_tracking" = "Stop";
+"live.permission_denied" = "Location denied. Enable it in Settings.";
+"live.open_settings" = "Open Settings";
+"live.recalibrate_hint" = "You can update the voltage anytime during the ride by checking your wheel display.";
