@@ -6,6 +6,7 @@ import CoreLocation
 struct LiveModeView: View {
     @StateObject private var viewModel = LiveModeViewModel()
     @State private var percentValue: Double = 95
+    @FocusState private var inputFocused: Bool
 
     var body: some View {
         NavigationStack {
@@ -14,6 +15,9 @@ struct LiveModeView: View {
                     wheelAndVoltageCard
                     speedCard
                     batteryCard
+                    if viewModel.isTracking {
+                        tripStatsCard
+                    }
                     rangeCard
 
                     trackingControl
@@ -27,8 +31,16 @@ struct LiveModeView: View {
                 }
                 .padding()
             }
+            .scrollDismissesKeyboard(.interactively)
             .navigationTitle("live.title")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("common.done") { inputFocused = false }
+                        .font(.body.weight(.semibold))
+                }
+            }
             .onChange(of: viewModel.selectedWheelId) { _, _ in
                 percentValue = viewModel.socPercent
             }
@@ -91,6 +103,7 @@ struct LiveModeView: View {
                               value: $viewModel.currentVoltage,
                               format: .number.precision(.fractionLength(0...1)))
                         .keyboardType(.decimalPad)
+                        .focused($inputFocused)
                         .font(.title3.weight(.medium))
                         .padding(.vertical, 10)
                         .padding(.horizontal, 14)
@@ -104,6 +117,7 @@ struct LiveModeView: View {
                               value: $percentValue,
                               format: .number.precision(.fractionLength(0...1)))
                         .keyboardType(.decimalPad)
+                        .focused($inputFocused)
                         .font(.title3.weight(.medium))
                         .padding(.vertical, 10)
                         .padding(.horizontal, 14)
@@ -118,9 +132,17 @@ struct LiveModeView: View {
                 }
             }
 
-            Text(voltageRangeLabel)
-                .font(.caption2)
-                .foregroundStyle(.tertiary)
+            HStack {
+                Text(voltageRangeLabel)
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+                Spacer()
+                if viewModel.energyUsedWh > 0 {
+                    Text(liveVoltageHint)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+            }
         }
         .padding(16)
         .background(Color(.systemBackground))
@@ -136,6 +158,11 @@ struct LiveModeView: View {
         let vMax = viewModel.voltageMax
         let format = String(localized: "live.voltage_range")
         return String(format: format, vMin, vMax)
+    }
+
+    private var liveVoltageHint: String {
+        let format = String(localized: "live.live_voltage_hint")
+        return String(format: format, viewModel.liveEquivalentVoltage)
     }
 
     // MARK: - Speed card
@@ -255,6 +282,63 @@ struct LiveModeView: View {
                 .stroke(Color(.separator), lineWidth: 0.5)
         )
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+    }
+
+    // MARK: - Trip stats card
+
+    private var tripStatsCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("live.trip_stats")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+            HStack(spacing: 8) {
+                MetricTile(
+                    titleKey: "live.trip_chrono",
+                    value: formatElapsed(viewModel.elapsedSeconds),
+                    unit: ""
+                )
+                MetricTile(
+                    titleKey: "live.trip_distance",
+                    value: String(format: "%.2f", viewModel.distanceTraveledKm),
+                    unit: "km"
+                )
+            }
+
+            HStack(spacing: 8) {
+                MetricTile(
+                    titleKey: "live.trip_avg_consumption",
+                    value: viewModel.distanceTraveledKm > 0.05
+                        ? String(format: "%.1f", viewModel.averageObservedWhPerKm)
+                        : "—",
+                    unit: "Wh/km"
+                )
+                MetricTile(
+                    titleKey: "live.trip_avg_speed",
+                    value: viewModel.elapsedSeconds > 5
+                        ? String(format: "%.1f", viewModel.averageSpeedKmh)
+                        : "—",
+                    unit: "km/h"
+                )
+            }
+        }
+        .padding(16)
+        .background(Color(.systemBackground))
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(Color(.separator), lineWidth: 0.5)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+    }
+
+    private func formatElapsed(_ seconds: TimeInterval) -> String {
+        let total = Int(seconds)
+        let h = total / 3600
+        let m = (total % 3600) / 60
+        let s = total % 60
+        return h > 0
+            ? String(format: "%d:%02d:%02d", h, m, s)
+            : String(format: "%d:%02d", m, s)
     }
 
     // MARK: - Tracking control

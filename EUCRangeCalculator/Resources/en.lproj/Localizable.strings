@@ -10,6 +10,7 @@
 // MARK: - Common
 "common.reset" = "Reset";
 "common.at" = "at";
+"common.done" = "Done";
 
 // MARK: - Calculator
 "calc.title" = "EUC Range";
@@ -71,4 +72,10 @@
 "live.stop_tracking" = "Stop";
 "live.permission_denied" = "Location denied. Enable it in Settings.";
 "live.open_settings" = "Open Settings";
-"live.recalibrate_hint" = "You can update the voltage anytime during the ride by checking your wheel display.";
+"live.recalibrate_hint" = "You can update the voltage anytime during the ride by checking your wheel display. The remaining battery decays live from the last calibration.";
+"live.trip_stats" = "Trip stats";
+"live.trip_chrono" = "Time";
+"live.trip_distance" = "Distance";
+"live.trip_avg_consumption" = "Real consumption";
+"live.trip_avg_speed" = "Avg speed";
+"live.live_voltage_hint" = "≈ %.1f V live";

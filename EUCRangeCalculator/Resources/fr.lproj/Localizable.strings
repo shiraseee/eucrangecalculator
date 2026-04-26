@@ -10,6 +10,7 @@
 // MARK: - Common
 "common.reset" = "Réinitialiser";
 "common.at" = "à";
+"common.done" = "Terminé";
 
 // MARK: - Calculator
 "calc.title" = "EUC Range";
@@ -71,4 +72,10 @@
 "live.stop_tracking" = "Arrêter";
 "live.permission_denied" = "Localisation refusée. Active-la dans les Réglages.";
 "live.open_settings" = "Ouvrir les Réglages";
-"live.recalibrate_hint" = "Tu peux mettre à jour le voltage à tout moment pendant le trajet en regardant ta roue.";
+"live.recalibrate_hint" = "Tu peux mettre à jour le voltage à tout moment pendant le trajet en regardant ta roue. La batterie restante décroît en live à partir de la dernière calibration.";
+"live.trip_stats" = "Statistiques du trajet";
+"live.trip_chrono" = "Chrono";
+"live.trip_distance" = "Distance";
+"live.trip_avg_consumption" = "Conso réelle";
+"live.trip_avg_speed" = "Vitesse moy.";
+"live.live_voltage_hint" = "≈ %.1f V live";

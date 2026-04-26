@@ -19,6 +19,12 @@ final class LocationManager: NSObject, ObservableObject {
     @Published private(set) var hasLocationError: Bool = false
     @Published private(set) var hasValidSignal: Bool = false
 
+    /// Fires once per valid GPS fix with the device-reported timestamp and the
+    /// smoothed speed. Subscribers (e.g. LiveModeViewModel) use this to integrate
+    /// energy and distance over real elapsed time, instead of guessing from
+    /// instantaneous values.
+    let samplePublisher = PassthroughSubject<(timestamp: Date, speedKmh: Double), Never>()
+
     private let manager = CLLocationManager()
     private var speedBuffer: [Double] = []
     private let bufferSize = 5
@@ -110,12 +116,14 @@ extension LocationManager: CLLocationManagerDelegate {
     nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let last = locations.last else { return }
         let raw = last.speed
+        let timestamp = last.timestamp
         Task { @MainActor in
             self.speedKmh = self.smoothSpeed(rawMps: raw)
             let valid = raw >= 0
             self.hasValidSignal = valid
             if valid {
                 self.lastValidUpdate = Date()
+                self.samplePublisher.send((timestamp: timestamp, speedKmh: self.speedKmh))
             }
         }
     }

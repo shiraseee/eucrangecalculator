@@ -5,6 +5,7 @@ import SwiftUI
 /// (custom battery, different riding style, etc.).
 struct AdvancedSettingsView: View {
     @ObservedObject var viewModel: RangeCalculatorViewModel
+    var inputFocused: FocusState<Bool>.Binding
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -21,7 +22,8 @@ struct AdvancedSettingsView: View {
                         value: Binding(
                             get: { viewModel.overrideBatteryWh ?? viewModel.selectedWheel.batteryWh },
                             set: { viewModel.overrideBatteryWh = $0 }
-                        )
+                        ),
+                        inputFocused: inputFocused
                     )
                     OverrideField(
                         labelKey: "calc.override_consumption",
@@ -29,7 +31,8 @@ struct AdvancedSettingsView: View {
                         value: Binding(
                             get: { viewModel.overrideWhPerKm ?? viewModel.selectedWheel.referenceWhPerKm },
                             set: { viewModel.overrideWhPerKm = $0 }
-                        )
+                        ),
+                        inputFocused: inputFocused
                     )
                 }
             }
@@ -48,6 +51,7 @@ private struct OverrideField: View {
     let labelKey: LocalizedStringKey
     let unit: String
     @Binding var value: Double
+    var inputFocused: FocusState<Bool>.Binding
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -60,6 +64,7 @@ private struct OverrideField: View {
                           value: $value,
                           format: .number.precision(.fractionLength(0...1)))
                     .keyboardType(.decimalPad)
+                    .focused(inputFocused)
                     .textFieldStyle(.plain)
                 Text(unit)
                     .font(.caption2)

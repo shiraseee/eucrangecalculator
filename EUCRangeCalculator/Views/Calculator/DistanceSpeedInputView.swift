@@ -5,6 +5,7 @@ import SwiftUI
 /// kilometers before anything else.
 struct DistanceSpeedInputView: View {
     @ObservedObject var viewModel: RangeCalculatorViewModel
+    var inputFocused: FocusState<Bool>.Binding
 
     var body: some View {
         HStack(spacing: 12) {
@@ -17,6 +18,7 @@ struct DistanceSpeedInputView: View {
                           value: $viewModel.distance,
                           format: .number.precision(.fractionLength(0...1)))
                     .keyboardType(.decimalPad)
+                    .focused(inputFocused)
                     .font(.title3.weight(.medium))
                     .textFieldStyle(.plain)
             }
