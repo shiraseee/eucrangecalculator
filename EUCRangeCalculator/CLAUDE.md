@@ -84,14 +84,17 @@ soc / socPercent = remainingWh / batteryWh
 
 ```swift
 static func speedFactor(for kmh: Double) -> Double {
-    return 0.6 + 0.4 * pow(kmh / referenceSpeedKmh, 2)
+    return 0.5 + 0.5 * pow(kmh / referenceSpeedKmh, 1.5)
 }
 ```
 
-Cette formule est **calibrée empiriquement** sur les retours communauté EUC (eucworld.com, forums, ride logs). Les constantes `0.6` et `0.4` ne sont pas arbitraires :
+Cette formule est **calibrée empiriquement** sur les retours communauté EUC (eucworld.com, forums, ride logs). Les constantes `0.5`, `0.5` et `1.5` ne sont pas arbitraires :
 - À 30 km/h (vitesse de référence des fiches constructeurs) → facteur = 1.0
-- À 50 km/h → facteur ≈ 1.71 (corrobore les observations Sherman)
-- À 60 km/h → facteur ≈ 2.20 (idem)
+- À 50 km/h → facteur ≈ 1.58 (corrobore les observations Sherman)
+- À 60 km/h → facteur ≈ 1.91 (idem)
+- À 70 km/h → facteur ≈ 2.28 (idem)
+
+L'exposant 1.5 (et non 2 comme la traînée pure) capture le fait qu'à haute vitesse le rider adopte une posture aéro qui réduit C_d × A. Une version antérieure utilisait `0.6 + 0.4 × (v/30)²` mais surestimait la conso de 10-20 % au-delà de 50 km/h.
 
 **Ne pas modifier** sans nouvelle calibration sur données réelles. Si quelqu'un demande une formule "plus précise", proposer plutôt un mode **trajet réel** en V2 (avec pente, vent, poids) plutôt que de tordre cette formule.
 

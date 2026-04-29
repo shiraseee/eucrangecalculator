@@ -10,18 +10,20 @@ enum RangeCalculator {
     /// Empirical aero model.
     ///
     /// At low speeds (< 30 km/h), rolling resistance dominates and consumption
-    /// is roughly constant. At higher speeds, aerodynamic drag grows as v^3,
-    /// so consumption per km grows as v^2.
+    /// is roughly constant. At higher speeds, aerodynamic drag grows, but
+    /// riders typically adopt a more aero-tucked posture which reduces the
+    /// drag area. The effective exponent on (v/v_ref) is therefore lower than
+    /// the textbook v^2: ~1.5 calibrated on real ride logs.
     ///
     /// Calibrated on EUC community data (eucworld.com, ride logs):
-    /// - Sherman S at 30 km/h: ~17 Wh/km (reference, factor = 1.0)
-    /// - Sherman S at 50 km/h: ~25-30 Wh/km (factor 1.7)
-    /// - Sherman S at 60 km/h: ~35-40 Wh/km (factor 2.2)
+    /// - Sherman S at 30 km/h: ~18 Wh/km (reference, factor = 1.0)
+    /// - Sherman S at 50 km/h: ~28 Wh/km (factor 1.58)
+    /// - Sherman S at 70 km/h: ~41 Wh/km (factor 2.28)
     ///
-    /// Returns a multiplier in approximately [0.78, 3.4] for speeds in [20, 80] km/h.
+    /// Returns a multiplier in approximately [0.77, 2.68] for speeds in [20, 80] km/h.
     static func speedFactor(for kmh: Double) -> Double {
         let v = max(0, kmh)
-        return 0.6 + 0.4 * pow(v / referenceSpeedKmh, 2)
+        return 0.5 + 0.5 * pow(v / referenceSpeedKmh, 1.5)
     }
 
     /// Effective Wh/km at a given cruise speed.

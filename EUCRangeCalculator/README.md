@@ -85,8 +85,13 @@ La conso `Wh/km` annoncée par les constructeurs est généralement valable auto
 Formule empirique calibrée sur données communauté EUC :
 
 ```
-effective_Wh/km = base_Wh/km × (0.6 + 0.4 × (vitesse / 30)²)
+effective_Wh/km = base_Wh/km × (0.5 + 0.5 × (vitesse / 30)^1.5)
 ```
+
+L'exposant 1.5 (au lieu du v² de la traînée pure) reflète le fait qu'en
+réalité le rider adopte une posture plus aéro à haute vitesse, ce qui réduit
+la surface de traînée. Sans cette correction, la conso était surestimée de
+10-20 % au-delà de 50 km/h.
 
 Validation Sherman S (base 18 Wh/km) :
 
@@ -94,8 +99,8 @@ Validation Sherman S (base 18 Wh/km) :
 |---|---|---|---|
 | 25 km/h | 0.88 | 15.8 | 228 km |
 | 30 km/h | 1.00 | 18.0 | 200 km (référence) |
-| 50 km/h | 1.71 | 30.8 | 117 km |
-| 70 km/h | 2.78 | 50.0 | 72 km |
+| 50 km/h | 1.58 | 28.4 | 127 km |
+| 70 km/h | 2.28 | 41.1 | 88 km |
 
 ### Live : voltage → % de charge
 
