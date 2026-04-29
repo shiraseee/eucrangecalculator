@@ -40,8 +40,29 @@ App → ContentView (TabView) → CalculatorView | LiveModeView
 Règles :
 - Les **Views** sont stateless, observent un `@StateObject` ou `@ObservedObject`
 - Les **ViewModels** sont `@MainActor` + `ObservableObject`, contiennent l'état UI et les `@Published`
-- **Utils** = `enum` namespaces de fonctions pures (jamais de classe avec état dedans)
+- **Utils** = `enum` namespaces de fonctions pures (jamais de classe avec état dedans), sauf `LocationManager` qui est une classe stateful par nature (delegate CoreLocation, watchdog Task)
 - **Model** = `struct` Codable/Hashable, source unique de vérité pour les specs roues
+
+### Le pipeline GPS → intégration live
+
+`LocationManager` ne se contente pas de publier `speedKmh`. Il expose aussi un `samplePublisher: PassthroughSubject<(timestamp: Date, speedKmh: Double), Never>` qui envoie un événement par fix GPS valide.
+
+`LiveModeViewModel` s'y abonne dans son `init` et **intègre** à chaque tick :
+
+```
+dt = sample.timestamp − lastTickTimestamp     // en secondes
+energyUsedWh    += effWhPerKm(speed) × speed × (dt / 3600)
+distanceTraveledKm += speed × (dt / 3600)
+```
+
+Tout l'état de batterie en mode Live est dérivé de cette intégration :
+
+```
+remainingWh   = initialWh(currentVoltage) − energyUsedWh
+soc / socPercent = remainingWh / batteryWh
+```
+
+**Ne pas court-circuiter** ce flux en faisant calculer la conso côté View ou en dérivant socPercent directement de currentVoltage : le `currentVoltage` est un **anchor de calibration** (ce que le rider a tapé en dernier), pas l'état courant.
 
 ## Code style
 
@@ -93,6 +114,28 @@ Pour ajouter une nouvelle roue, voir la section "Tâches courantes".
 
 Une courbe non-linéaire (3-segments, polynomiale, etc.) **est une feature V2**, pas un fix de V1.
 
+### 4. Les seuils d'intégration live
+
+Dans `LiveModeViewModel` :
+
+```swift
+private let maxIntegrationGapSeconds: TimeInterval = 3
+private let standstillThresholdKmh: Double = 0.5
+```
+
+- **`maxIntegrationGapSeconds = 3`** : si `dt > 3 s` entre deux ticks GPS (tunnel, app backgroundée, jitter d'horloge), on **saute** ce tick au lieu d'intégrer un trou. Sans ça, sortir d'un tunnel après 30 s ferait sauter le % comme si tu avais tenu la dernière vitesse pendant 30 s.
+- **`standstillThresholdKmh = 0.5`** : en dessous, on n'accumule ni énergie ni distance. Évite de pénaliser les feux rouges et le bruit GPS à l'arrêt. Le choix produit est **conso = 0 à l'arrêt** (le gyro qui se balance ~50 W est négligé).
+
+Dans `LocationManager` :
+
+```swift
+private let signalTimeoutSeconds: TimeInterval = 5
+```
+
+Watchdog qui flip `hasValidSignal = false` après 5 s sans fix valide.
+
+**Ne pas tordre ces seuils sans données.** Un user qui dit "j'ai roulé 3 min et la batterie a pas bougé" doit être traité avec : (a) check qu'il roulait > 0.5 km/h, (b) check qu'il avait du signal, (c) vérifier que les fix ne sortaient pas en dt > 3 s, **avant** de relâcher les seuils.
+
 ## Conventions de persistance
 
 L'app utilise **UserDefaults manuel** via `didSet` plutôt que `@AppStorage` parce que :
@@ -117,6 +160,18 @@ Clés actuelles (préfixées par mode pour éviter les collisions) :
 - `live.lastWheelId`, `live.lastVoltage`
 
 **Les overrides du mode avancé NE SONT PAS persistés** (intentionnel : reset à chaque session).
+
+### Re-calibration du voltage en mode Live
+
+`LiveModeViewModel.currentVoltage.didSet` fait **deux choses** :
+1. Persiste dans UserDefaults (clé `live.lastVoltage`)
+2. **Reset `energyUsedWh = 0`** — c'est la re-calibration : le rider qui retape la valeur lue sur sa roue corrige la dérive du modèle, donc on repart d'une nouvelle baseline.
+
+Conséquences importantes :
+- `selectWheel(_)` set `currentVoltage = wheel.voltage * 0.95` → reset auto de l'accumulateur (souhaité : nouvelle roue = nouvelle session énergétique).
+- `setPercent(_)` passe par `currentVoltage` → idem reset auto.
+- L'init() bypass le didSet (Swift) donc le reload depuis UserDefaults au lancement n'efface rien (mais `energyUsedWh` est de toute façon initialisé à 0 par le @Published).
+- `distanceTraveledKm` et `elapsedSeconds` ne sont **PAS** reset par la re-calibration, seulement par `stopTracking()` ou un nouveau `startTracking()`.
 
 ## Localisation
 
@@ -210,6 +265,32 @@ On utilise `.onChange(of: ...) { _, _ in }` (deux paramètres, valeur ancienne e
 ### Les % de batterie en mode Live
 
 Quand le user passe du mode "Volts" au mode "%", on met à jour `percentValue` depuis `socPercent`. Le binding du TextField "%" déclenche `setPercent()` qui réécrit `currentVoltage`. C'est un peu indirect, mais ça permet de garder `currentVoltage` comme **source unique de vérité** côté ViewModel. Ne pas refactorer pour stocker un `currentPercent` séparé — ça créerait un état dérivé bidirectionnel piégeux.
+
+### Le champ % NE se synchronise PAS avec le SoC live qui décroît
+
+C'est volontaire : `percentValue` (le champ d'input) est l'**ancrage de calibration** et ne suit pas la décroissance live. Sinon, à chaque tick on aurait `percentValue = socPercent → setPercent → reset energyUsedWh → socPercent recalculé = percentValue`, donc le % ne descendrait jamais. Le % live est affiché dans la **batterieCard** (gros nombre coloré), pas dans le champ d'input. Si quelqu'un demande "fais que le champ % se mette à jour tout seul", **c'est un anti-pattern** — refuser ou demander à clarifier.
+
+### Clavier dismissable
+
+Tous les TextField décimaux passent par un `@FocusState private var inputFocused: Bool` partagé au niveau de la View racine (CalculatorView, LiveModeView). Pattern :
+
+```swift
+@FocusState private var inputFocused: Bool
+
+ScrollView { ... }
+    .scrollDismissesKeyboard(.interactively)
+    .toolbar {
+        ToolbarItemGroup(placement: .keyboard) {
+            Spacer()
+            Button("common.done") { inputFocused = false }
+        }
+    }
+
+// Sur chaque TextField :
+.focused($inputFocused)  // ou la version FocusState<Bool>.Binding pour les sub-views
+```
+
+Les sub-views (DistanceSpeedInputView, AdvancedSettingsView, OverrideField) reçoivent le focus via `var inputFocused: FocusState<Bool>.Binding` (et non `@FocusState`, qui ne fonctionne qu'au niveau "root"). **Ne pas dupliquer un FocusState par sub-view** — sinon la toolbar Done ne saurait pas quel champ est focus.
 
 ## Out of scope (V2 ou jamais)
 
